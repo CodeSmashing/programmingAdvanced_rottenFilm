@@ -35,18 +35,18 @@ public class Movie {
 		// If we don't have any directors then we will pick one at random
 		if (directors.equals("")) directors = randomNames[(int) Math.floor(Math.random() * randomNames.length)];
 
-		this.show_id = Integer.parseInt(show_id.trim());
-		this.type = type.trim();
-		this.title = title.trim();
-		this.directors = directors.trim().split(",");
-		this.cast = cast.trim().split(",");
-		this.country = country.trim().split(",");
+		this.show_id = Integer.parseInt(show_id);
+		this.type = type;
+		this.title = title;
+		this.directors = directors.split(",");
+		this.cast = cast.split(",");
+		this.country = country.split(",");
 		this.date_added = date_added;
-		this.release_year = Integer.parseInt(release_year.trim());
-		this.rating = rating.trim();
-		this.duration = Integer.parseInt(duration.trim().split("\\s+")[0]);
-		this.listed_in = listed_in.trim().split(",");
-		this.description = description.trim();
+		this.release_year = Integer.parseInt(release_year);
+		this.rating = rating;
+		this.duration = Integer.parseInt(duration.split("\\s+")[0]);
+		this.listed_in = listed_in.split(",");
+		this.description = description;
 	}
 
 	public Integer getShow_id() {

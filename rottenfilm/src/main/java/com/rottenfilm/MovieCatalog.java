@@ -7,29 +7,28 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class MovieCatalog {
-    private ArrayList<Movie> movieCatalog;
+    private ArrayList<Movie> catalog;
 	private String dataPath;
 	private Integer currentPage = 1;
-	private Integer moviesPerPageLimit = 2;
-	private Integer movieLimit = 10; // Limit the amount of movies for testing
-	private Integer movieCount = 0;
-	private String[] tagList = {"show_id","type","title","director","cast","country","date_added","release_year","rating","duration","listed_in","description"};
+	private Integer perPageLimit = 5;
+	private Integer movieLimit = 20; // Limit the amount of movies for testing
 
 	public MovieCatalog(String dataPath) {
 		this.dataPath = dataPath;
-		this.movieCatalog = parseMovies();
+		this.catalog = parseMovies();
 	}
 
     public ArrayList<Movie> parseMovies() {
         ArrayList<Movie> parsedMovies = new ArrayList<>(movieLimit);
         String line = "";
+		Integer movieCount = 0;
 
 		// Regex to split by comma, ignoring commas inside double double quotes
         String splitBy = ",(?=(?:[^\\\"]*\\\"\\\"[^\\\"]*\\\"\\\")*[^\\\"]*$)";
 
         try (BufferedReader br = new BufferedReader(new FileReader(dataPath))) {
-            // Skip the header line
-            br.readLine();
+			// Get all the fields from the header
+			String[] headerFields = br.readLine().replace(";", "").split(",");
 
             while ((line = br.readLine()) != null && movieCount < movieLimit) {
                 // Remove the enclosing quotes and double semicolons and split the initial movie item into its constituent parts
@@ -49,7 +48,7 @@ public class MovieCatalog {
                         }
                     }
 
-                    movieMap.put(tagList[i], values[i]);
+                    movieMap.put(headerFields[i], values[i]);
                 }
                 parsedMovies.add(new Movie(
 					movieMap.get("show_id"),
@@ -80,14 +79,14 @@ public class MovieCatalog {
 	}
 
 	public Integer getPerPageLimit() {
-		return moviesPerPageLimit;
+		return perPageLimit;
 	}
 
 	public int size() {
-		return movieCatalog.size();
+		return catalog.size();
 	}
 
 	public Movie get(int i) {
-		return movieCatalog.get(i);
+		return catalog.get(i);
 	}
 }

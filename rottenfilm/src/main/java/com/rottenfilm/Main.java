@@ -6,8 +6,9 @@ public class Main {
     public static final String DATA_PATH = "./rottenfilm/src/main/resources/";
 
     public static void main(String[] args) {
-        MovieCatalog movieCatalog = new MovieCatalog(DATA_PATH + "netflix_titles.csv");
-        UserInterface ui = new UserInterface(movieCatalog);
+        MovieCatalog catalog = new MovieCatalog(DATA_PATH + "netflix_titles.csv");
+        UserInterface ui = new UserInterface(catalog);
+
         ui.clearTerminal();
         ui.run();
     }
