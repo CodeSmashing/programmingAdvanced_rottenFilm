@@ -1,0 +1,93 @@
+package com.rottenfilm;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+public class MovieCatalog {
+    private ArrayList<Movie> movieCatalog;
+	private String dataPath;
+	private Integer currentPage = 1;
+	private Integer moviesPerPageLimit = 2;
+	private Integer movieLimit = 10; // Limit the amount of movies for testing
+	private Integer movieCount = 0;
+	private String[] tagList = {"show_id","type","title","director","cast","country","date_added","release_year","rating","duration","listed_in","description"};
+
+	public MovieCatalog(String dataPath) {
+		this.dataPath = dataPath;
+		this.movieCatalog = parseMovies();
+	}
+
+    public ArrayList<Movie> parseMovies() {
+        ArrayList<Movie> parsedMovies = new ArrayList<>(movieLimit);
+        String line = "";
+
+		// Regex to split by comma, ignoring commas inside double double quotes
+        String splitBy = ",(?=(?:[^\\\"]*\\\"\\\"[^\\\"]*\\\"\\\")*[^\\\"]*$)";
+
+        try (BufferedReader br = new BufferedReader(new FileReader(dataPath))) {
+            // Skip the header line
+            br.readLine();
+
+            while ((line = br.readLine()) != null && movieCount < movieLimit) {
+                // Remove the enclosing quotes and double semicolons and split the initial movie item into its constituent parts
+                String[] values = line.substring(1, line.length() - 3).split(splitBy, -1); // -1 to keep trailing empty values
+                // To map keys to values
+                HashMap<String, String> movieMap = new HashMap<>();
+
+                for (int i = 0; i < values.length; i++) {
+                    // Replace double double quotes with square brackets in values that have them
+                    if (values[i].startsWith("\"\"") && values[i].endsWith("\"\"")) {
+                        values[i] = "" + values[i].substring(2, values[i].length() - 2);
+                        // We avoid doing anything with the description or the release date for now
+                        if (!(i == values.length - 1 || values[i].matches("[a-zA-Z]*\\s\\d+,\\s\\d+"))) {
+                            // We add square brackets for other collections
+                            // values[i] = "[" + values[i] + "]";
+                            values[i] = values[i].replace(", ", ",");
+                        }
+                    }
+
+                    movieMap.put(tagList[i], values[i]);
+                }
+                parsedMovies.add(new Movie(
+					movieMap.get("show_id"),
+					movieMap.get("type"),
+					movieMap.get("title"),
+					movieMap.get("director"),
+					movieMap.get("cast"),
+					movieMap.get("country"),
+					movieMap.get("date_added"),
+					movieMap.get("release_year"),
+					movieMap.get("rating"),
+					movieMap.get("duration"),
+					movieMap.get("listed_in"),
+					movieMap.get("description")
+				));
+                movieCount++;
+            }
+        } catch(IOException e) {
+            System.err.println("Fout bij het lezen van het bestand.");
+            e.printStackTrace();
+        }
+
+        return parsedMovies;
+    }
+
+	public Integer getCurrentPage() {
+		return currentPage;
+	}
+
+	public Integer getPerPageLimit() {
+		return moviesPerPageLimit;
+	}
+
+	public int size() {
+		return movieCatalog.size();
+	}
+
+	public Movie get(int i) {
+		return movieCatalog.get(i);
+	}
+}
