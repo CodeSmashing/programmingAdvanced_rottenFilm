@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class MovieCatalog {
@@ -28,28 +29,40 @@ public class MovieCatalog {
 
         try (BufferedReader br = new BufferedReader(new FileReader(dataPath))) {
 			// Get all the fields from the header
-			String[] headerFields = br.readLine().replace(";", "").split(",");
+			ArrayList<String> headerFields = new ArrayList<>(Arrays.asList(br.readLine().replace(";", "").split(",")));
+
+			if (!headerFields.contains("reviews")) {
+				headerFields.add("reviews");
+			}
 
             while ((line = br.readLine()) != null && movieCount < movieLimit) {
                 // Remove the enclosing quotes and double semicolons and split the initial movie item into its constituent parts
-                String[] values = line.substring(1, line.length() - 3).split(splitBy, -1); // -1 to keep trailing empty values
+                ArrayList<String> values = new ArrayList<>(Arrays.asList(line.substring(1, line.length() - 3).split(splitBy, -1))); // -1 to keep trailing empty values
+
                 // To map keys to values
                 HashMap<String, String> movieMap = new HashMap<>();
 
-                for (int i = 0; i < values.length; i++) {
+				// If a movie item doesn't have all the fields as defined in headerFields,
+				// we add every missing field as "null" (Should only be temporary as we should check where to add these)
+				for (int i = values.size(); i < headerFields.size(); i++) {
+					values.add("");
+				}
+
+                for (int i = 0; i < values.size(); i++) {
                     // Replace double double quotes with square brackets in values that have them
-                    if (values[i].startsWith("\"\"") && values[i].endsWith("\"\"")) {
-                        values[i] = "" + values[i].substring(2, values[i].length() - 2);
+                    if (values.get(i).startsWith("\"\"") && values.get(i).endsWith("\"\"")) {
+                        values.set(i, "" + values.get(i).substring(2, values.get(i).length() - 2));
+
                         // We avoid doing anything with the description or the release date for now
-                        if (!(i == values.length - 1 || values[i].matches("[a-zA-Z]*\\s\\d+,\\s\\d+"))) {
-                            // We add square brackets for other collections
-                            // values[i] = "[" + values[i] + "]";
-                            values[i] = values[i].replace(", ", ",");
+						// But we do change the comma sepperation of everything else to not include a space
+                        if (!(i == values.size() - 1 || values.get(i).matches("[a-zA-Z]*\\s\\d+,\\s\\d+"))) {
+                            values.set(i, values.get(i).replace(", ", ","));
                         }
                     }
 
-                    movieMap.put(headerFields[i], values[i]);
+                    movieMap.put(headerFields.get(i), values.get(i));
                 }
+
                 parsedMovies.add(new Movie(
 					movieMap.get("show_id"),
 					movieMap.get("type"),
@@ -62,7 +75,8 @@ public class MovieCatalog {
 					movieMap.get("rating"),
 					movieMap.get("duration"),
 					movieMap.get("listed_in"),
-					movieMap.get("description")
+					movieMap.get("description"),
+					movieMap.get("reviews")
 				));
                 movieCount++;
             }

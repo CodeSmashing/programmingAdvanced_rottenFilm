@@ -3,13 +3,9 @@ package com.rottenfilm;
 public class Main {
     // Constants
     public static final String MAIN_PATH = "./rottenfilm/src/main/java/com/rottenfilm/";
-    public static final String DATA_PATH = "./rottenfilm/src/main/resources/";
 
     public static void main(String[] args) {
-        MovieCatalog catalog = new MovieCatalog(DATA_PATH + "netflix_titles.csv");
-        UserInterface ui = new UserInterface(catalog);
-
-        ui.clearTerminal();
+        UserInterface ui = new UserInterface();
         ui.run();
     }
 }
