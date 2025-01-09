@@ -13,4 +13,6 @@ public abstract class Pages {
         String[] options = pageOptions.values().iterator().next();
 		return String.join(", ", options);
 	}
+
+    protected abstract void displayPage();
 }

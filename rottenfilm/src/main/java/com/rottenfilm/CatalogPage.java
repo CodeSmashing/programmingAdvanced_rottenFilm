@@ -3,19 +3,35 @@ package com.rottenfilm;
 import java.util.Map;
 
 public class CatalogPage extends Pages {
-    private static final String DATA_PATH = "./rottenfilm/src/main/resources/";
-	private MovieCatalog catalog = new MovieCatalog(DATA_PATH + "netflix_titles.csv");
+	private Integer currentPage = 0;
+	private Integer perPageLimit = 5;
+	private MovieCatalog catalog = new MovieCatalog();
 
 	public CatalogPage() {
 		super();
-        pageOptions = Map.of("catalog", new String[]{"Sluit", "Terug", "Thuis", "Hulp"});
+        pageOptions = Map.of("catalog", new String[]{"sluit", "terug", "thuis", "volgende", "review", "help"});
 	}
 
-    public void displayFilmCatalog() {
-		// We take the current catalogue page number and multiply that by the amount of movies we want per page
-		for (int i = 0; i < catalog.getCurrentPage() * catalog.getPerPageLimit(); i++) {
+	public MovieCatalog getCatalog() {
+		return catalog;
+	}
+
+	public Integer getCurrentCatalogPage() {
+		return currentPage;
+	}
+
+	public Integer getPerPageLimit() {
+		return perPageLimit;
+	}
+
+	@Override
+    public void displayPage() {
+		for (int i = 0; i < getPerPageLimit(); i++) {
 			if (i > catalog.size()) break;
-			Movie movie = catalog.get(i);
+
+			// We take the catalog at index i + (the page we're on * whatever the limit per page is)
+			// Because we want every page to contain for example 5 movies and no duplicates
+			Movie movie = catalog.get(i + (getCurrentCatalogPage() * getPerPageLimit()));
 			System.out.println("----------+++++++++========[]========+++++++++----------");
 			System.out.println(String.format(
 				"\t%s\n\t\t%s",

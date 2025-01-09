@@ -113,6 +113,10 @@ public class Movie {
 		return reviews;
 	}
 
+	public void addReview(String[] inputs) {
+		reviews.add(new Review(inputs[1], inputs[2], Double.parseDouble(inputs[3])));
+	}
+
 	@Override
 	public String toString() {
 		return String.format(

@@ -6,28 +6,21 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 
-public class MovieCatalog {
-    private ArrayList<Movie> catalog;
-	private String dataPath;
-	private Integer currentPage = 1;
-	private Integer perPageLimit = 5;
+public class MovieCatalog implements Iterable<Movie> {
+    private static final String DATA_PATH = "./rottenfilm/src/main/resources/netflix_titles.csv";
+	private ArrayList<Movie> catalog = new ArrayList<Movie>();
 	private Integer movieLimit = 20; // Limit the amount of movies for testing
 
-	public MovieCatalog(String dataPath) {
-		this.dataPath = dataPath;
-		this.catalog = parseMovies();
-	}
-
-    public ArrayList<Movie> parseMovies() {
-        ArrayList<Movie> parsedMovies = new ArrayList<>(movieLimit);
+    public MovieCatalog() {
         String line = "";
 		Integer movieCount = 0;
 
 		// Regex to split by comma, ignoring commas inside double double quotes
         String splitBy = ",(?=(?:[^\\\"]*\\\"\\\"[^\\\"]*\\\"\\\")*[^\\\"]*$)";
 
-        try (BufferedReader br = new BufferedReader(new FileReader(dataPath))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(DATA_PATH))) {
 			// Get all the fields from the header
 			ArrayList<String> headerFields = new ArrayList<>(Arrays.asList(br.readLine().replace(";", "").split(",")));
 
@@ -63,7 +56,7 @@ public class MovieCatalog {
                     movieMap.put(headerFields.get(i), values.get(i));
                 }
 
-                parsedMovies.add(new Movie(
+                catalog.add(new Movie(
 					movieMap.get("show_id"),
 					movieMap.get("type"),
 					movieMap.get("title"),
@@ -84,16 +77,13 @@ public class MovieCatalog {
             System.err.println("Fout bij het lezen van het bestand.");
             e.printStackTrace();
         }
-
-        return parsedMovies;
     }
 
-	public Integer getCurrentPage() {
-		return currentPage;
-	}
-
-	public Integer getPerPageLimit() {
-		return perPageLimit;
+	public Movie getMovie(Integer showId) {
+		for (Movie movie : catalog) {
+			if (movie.getShowId().equals(showId)) return movie;
+		}
+		return null; // Return null if no movie is found
 	}
 
 	public int size() {
@@ -103,4 +93,9 @@ public class MovieCatalog {
 	public Movie get(int i) {
 		return catalog.get(i);
 	}
+
+    @Override
+    public Iterator<Movie> iterator() {
+        return catalog.iterator();
+    }
 }

@@ -1,54 +1,49 @@
 package com.rottenfilm;
 
+import java.util.Arrays;
+
 public class CommandProcessor {
     private Navigation navbar;
-	private final HomePage homePage = new HomePage();
-	private final HelpPage helpPage = new HelpPage();
-	private final CatalogPage catalogPage = new CatalogPage();
 
 	public CommandProcessor(Navigation navbar) {
         this.navbar = navbar;
 	}
 
-	public void processOption(Character action, String option) {
-		if (action == '!') {
-			switch (option.toLowerCase()) {
-				case "s":
+	public String processOption(String input) {
+		Pages currentPage = navbar.getCurrentPage();
+
+		// We check if the input is a command in the format ![action]
+		if (input.matches("^![^\\s]+$")) {
+			String option = input.substring(1).toLowerCase();
+
+			// See if the inputted option matches any available of the current page
+			if (!Arrays.asList(currentPage.getPageOptionsString().split(", ")).contains(option)) {
+				System.err.println("Onherkende optie: " + option);
+				return "default";
+			}
+
+			switch (option) {
 				case "sluit":
-				case "sluiten":
-				case "exit":
-				case "x":
 					handleExit();
 					break;
-				case "t":
 				case "terug":
 					handleBack();
 					break;
-				case "test":
-					System.out.println("This is a succesfull test.");
-					break;
-				default:
-					System.err.println("Onherkende optie: " + option);
-					break;
-			}
-		} else if (action == '?') {
-			switch (option.toLowerCase()) {
-				case "f":
-				case "film":
-				case "c":
 				case "catalog":
-				case "catalogus":
-				case "filmcatalogus":
 					clearTerminal();
-					navbar.stepUpCurrentPath("catalogus");
-					catalogPage.displayFilmCatalog();
+					navbar.stepUpPath("catalog");
+					navbar.getPages().get("catalog").displayPage();
 					break;
-				case "h":
-				case "hulp":
+				case "review":
+					if (currentPage.getClass().getSimpleName() == "CatalogPage") break;
+					return "review-movie";
+				case "volgende":
+					if (currentPage.getClass().getSimpleName() == "CatalogPage") break;
+					return "next-catalog-page";
 				case "help":
 					clearTerminal();
-					navbar.stepUpCurrentPath("help");
-					helpPage.displayHelp();
+					navbar.stepUpPath("help");
+					navbar.getPages().get("help").displayPage();
 					break;
 				case "test":
 					System.out.println("This is a succesfull test.");
@@ -57,9 +52,17 @@ public class CommandProcessor {
 					System.err.println("Onherkende optie: " + option);
 					break;
 			}
-		} else {
-			System.err.println("Onherkende action: " + action);
+		} else if (currentPage.getClass().getSimpleName() == "CatalogPage") {
+			input = input.substring(0).toUpperCase() + input.substring(1);
+
+			if (input.matches("[^a-zA-Z]+")) {
+				System.err.println("De input bevat ongeldige characters: " + input);
+				return "default";
+			} else {
+				String[] tempReview = new String[3];
+			}
 		}
+		return "default";
 	}
 
     public void clearTerminal() {
@@ -77,20 +80,8 @@ public class CommandProcessor {
 
 	private void handleBack() {
 		clearTerminal();
-		if (navbar.getCurrentPathString() != "/thuis") {
-			navbar.stepBackCurrentPath();
+		if (navbar.getPathString() != "/thuis") {
+			navbar.stepBackPath();
 		}
-	}
-
-	public CatalogPage getCatalogPage() {
-		return catalogPage;
-	}
-
-	public HelpPage getHelpPage() {
-		return helpPage;
-	}
-
-	public HomePage getHomePage() {
-		return homePage;
 	}
 }
